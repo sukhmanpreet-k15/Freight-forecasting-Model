@@ -5,7 +5,7 @@ from xgboost import XGBRegressor
 from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
 from sklearn.metrics import mean_absolute_error
 
-model1_data = pd.read_csv("data/processed/model1_data.csv")
+model1_data = pd.read_csv("C:\\Users\\sukhm\\OneDrive\\Desktop\\pydev\\Freight-forecasting-Model\\data\\processed\\model1_data.csv")
 
 ship_types = ["HSI", "SI", "PI", "CI"]
 
@@ -45,3 +45,21 @@ for ship in ship_types:
     print(ship, "done")
 
 print(pd.DataFrame(results))
+
+
+#saving final model
+import joblib
+
+final_models = {}
+
+for ship in ship_types:
+    X_train = train[["DCOILBRENTEU", f"{ship}_yesterday"]]
+    y_train = train[ship]
+
+    lr = LinearRegression()
+    lr.fit(X_train, y_train)
+
+    final_models[ship] = lr
+    joblib.dump(lr, f"C:\\Users\\sukhm\\OneDrive\\Desktop\\pydev\\Freight-forecasting-Model\\models\\model1_{ship}.pkl")
+
+print("All 4 models saved.")
