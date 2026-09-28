@@ -39,3 +39,10 @@ xgb = GridSearchCV(XGBRegressor(), {"n_estimators": [100, 200, 300], "max_depth"
                    cv=tscv, scoring="neg_mean_absolute_error", n_jobs=-1).fit(X_train, y_train)
 print("XGBoost MAE:", mean_absolute_error(y_test, xgb.predict(X_test)))
 
+import joblib
+
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+
+joblib.dump(lr, "models/model2_wci.pkl")
+print("Model 2 saved.")
