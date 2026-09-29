@@ -13,6 +13,8 @@ ship_types = ["HSI", "SI", "PI", "CI"]
 for ship in ship_types:
     model1_data[f"{ship}_yesterday"] = model1_data[ship].shift(1)
 
+model1_data["oil_yesterday"] = model1_data["DCOILBRENTEU"].shift(1)
+
 model1_data = model1_data.dropna().reset_index(drop=True)
 
 split_point = int(len(model1_data) * 0.8)
@@ -24,9 +26,9 @@ tscv = TimeSeriesSplit(n_splits=5)
 results = {}
 
 for ship in ship_types:
-    X_train = train[["DCOILBRENTEU", f"{ship}_yesterday"]]
+    X_train = train[[ f"{ship}_yesterday", "oil_yesterday"]]
     y_train = train[ship]
-    X_test = test[["DCOILBRENTEU", f"{ship}_yesterday"]]
+    X_test = test[[f"{ship}_yesterday", "oil_yesterday"]]
     y_test = test[ship]
 
     lr = LinearRegression()
@@ -53,7 +55,7 @@ import joblib
 final_models = {}
 
 for ship in ship_types:
-    X_train = train[["DCOILBRENTEU", f"{ship}_yesterday"]]
+    X_train = train[[f"{ship}_yesterday", "oil_yesterday"]]
     y_train = train[ship]
 
     lr = LinearRegression()
