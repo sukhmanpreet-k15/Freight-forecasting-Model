@@ -10,15 +10,16 @@ model2_data = pd.read_csv(r"C:\Users\sukhm\OneDrive\Desktop\pydev\Freight-foreca
 
 # last week's price as a feature
 model2_data["wci_lastweek"] = model2_data["wci"].shift(1)
+model2_data["oil_lastweek"] = model2_data["DCOILBRENTEU"].shift(1)
 model2_data = model2_data.dropna().reset_index(drop=True)
 #splitting the data into train and test sets
 split_point = int(len(model2_data) * 0.8)
 train = model2_data[:split_point]
 test = model2_data[split_point:]
 #training the models using the features DCOILBRENTEU and wci_lastweek to predict wci
-X_train = train[["DCOILBRENTEU", "wci_lastweek"]]
+X_train = train[["oil_lastweek", "wci_lastweek"]]
 y_train = train["wci"]
-X_test = test[["DCOILBRENTEU", "wci_lastweek"]]
+X_test = test[["oil_lastweek", "wci_lastweek"]]
 y_test = test["wci"]
 
 tscv = TimeSeriesSplit(n_splits=5)
@@ -44,5 +45,5 @@ import joblib
 lr = LinearRegression()
 lr.fit(X_train, y_train)
 
-joblib.dump(lr, "models/model2_wci.pkl")
+joblib.dump(lr, r"C:\Users\sukhm\OneDrive\Desktop\pydev\Freight-forecasting-Model\models\model2_wci.pkl")
 print("Model 2 saved.")
