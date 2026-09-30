@@ -1,4 +1,5 @@
 import pandas as pd
+import joblib
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
@@ -9,11 +10,16 @@ model1_data = pd.read_csv("C:\\Users\\sukhm\\OneDrive\\Desktop\\pydev\\Freight-f
 
 ship_types = ["HSI", "SI", "PI", "CI"]
 
-# create a "yesterday" column for each ship type
+# create feature columns for each ship type
 for ship in ship_types:
     model1_data[f"{ship}_yesterday"] = model1_data[ship].shift(1)
+    model1_data[f"{ship}_lag2"] = model1_data[ship].shift(2)
+    model1_data[f"{ship}_lag3"] = model1_data[ship].shift(3)
+    model1_data[f"{ship}_change"] = model1_data[ship].shift(1).diff(1)
+    model1_data[f"{ship}_roll3"] = model1_data[ship].shift(1).rolling(3).mean()
 
 model1_data["oil_yesterday"] = model1_data["DCOILBRENTEU"].shift(1)
+model1_data["oil_roll3"] = model1_data["DCOILBRENTEU"].shift(1).rolling(3).mean()
 
 model1_data = model1_data.dropna().reset_index(drop=True)
 
@@ -25,10 +31,13 @@ tscv = TimeSeriesSplit(n_splits=5)
 
 results = {}
 
+# ---- compare models for each ship type ----
 for ship in ship_types:
-    X_train = train[[ f"{ship}_yesterday", "oil_yesterday"]]
+    ship_features = [f"{ship}_yesterday", f"{ship}_lag2", f"{ship}_lag3", f"{ship}_change", f"{ship}_roll3", "oil_yesterday", "oil_roll3"]
+
+    X_train = train[ship_features]
     y_train = train[ship]
-    X_test = test[[f"{ship}_yesterday", "oil_yesterday"]]
+    X_test = test[ship_features]
     y_test = test[ship]
 
     lr = LinearRegression()
@@ -43,19 +52,20 @@ for ship in ship_types:
     xgb_grid.fit(X_train, y_train)
     xgb_mae = mean_absolute_error(y_test, xgb_grid.predict(X_test))
 
-    results[ship] = {"Linear Regression": lr_mae, "Random Forest": rf_mae, "XGBoost": xgb_mae}
+    naive_mae = mean_absolute_error(y_test, X_test[f"{ship}_yesterday"])
+
+    results[ship] = {"Linear Regression": lr_mae, "Random Forest": rf_mae, "XGBoost": xgb_mae, "Naive Guess": naive_mae}
     print(ship, "done")
 
 print(pd.DataFrame(results))
 
-
-#saving final model
-import joblib
-
+# ---- save final models ----
 final_models = {}
 
 for ship in ship_types:
-    X_train = train[[f"{ship}_yesterday", "oil_yesterday"]]
+    ship_features = [f"{ship}_yesterday", f"{ship}_lag2", f"{ship}_lag3", f"{ship}_change", f"{ship}_roll3", "oil_yesterday", "oil_roll3"]
+
+    X_train = train[ship_features]
     y_train = train[ship]
 
     lr = LinearRegression()
