@@ -10,16 +10,25 @@ model2_data = pd.read_csv(r"C:\Users\sukhm\OneDrive\Desktop\pydev\Freight-foreca
 
 # last week's price as a feature
 model2_data["wci_lastweek"] = model2_data["wci"].shift(1)
+model2_data["wci_lag2"] = model2_data["wci"].shift(2)
+model2_data["wci_lag3"] = model2_data["wci"].shift(3)
+model2_data["wci_change"] = model2_data["wci"].shift(1).diff(1)
+model2_data["wci_roll3"] = model2_data["wci"].shift(1).rolling(3).mean()
+
 model2_data["oil_lastweek"] = model2_data["DCOILBRENTEU"].shift(1)
+model2_data["oil_roll3"] = model2_data["DCOILBRENTEU"].shift(1).rolling(3).mean()
+
 model2_data = model2_data.dropna().reset_index(drop=True)
 #splitting the data into train and test sets
 split_point = int(len(model2_data) * 0.8)
 train = model2_data[:split_point]
 test = model2_data[split_point:]
 #training the models using the features DCOILBRENTEU and wci_lastweek to predict wci
-X_train = train[["oil_lastweek", "wci_lastweek"]]
+features = ["wci_lastweek", "wci_lag2", "wci_lag3", "wci_change", "wci_roll3", "oil_lastweek", "oil_roll3"]
+
+X_train = train[features]
 y_train = train["wci"]
-X_test = test[["oil_lastweek", "wci_lastweek"]]
+X_test = test[features]
 y_test = test["wci"]
 
 tscv = TimeSeriesSplit(n_splits=5)
@@ -39,6 +48,9 @@ xgb = GridSearchCV(XGBRegressor(), {"n_estimators": [100, 200, 300], "max_depth"
                    "learning_rate": [0.01, 0.05, 0.1], "subsample": [0.8, 1.0]},
                    cv=tscv, scoring="neg_mean_absolute_error", n_jobs=-1).fit(X_train, y_train)
 print("XGBoost MAE:", mean_absolute_error(y_test, xgb.predict(X_test)))
+
+naive_mae = mean_absolute_error(y_test, X_test["wci_lastweek"])
+print("Naive guess MAE:", naive_mae)
 
 import joblib
 
