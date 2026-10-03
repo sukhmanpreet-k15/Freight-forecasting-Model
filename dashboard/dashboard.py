@@ -41,3 +41,13 @@ for col, (ship, name) in zip(columns, ships.items()):
 
     pred = model.predict(row)[0]
     col.metric(name + " - expected", int(round(pred)), int(round(pred - last[ship])))
+
+    # ---------- PART 2: time range buttons ----------
+choice = st.radio("Time range", ["1M", "3M", "6M", "1Y", "All"], index=3, horizontal=True)
+months = {"1M": 1, "3M": 3, "6M": 6, "1Y": 12}
+ 
+if choice == "All":
+    view = df
+else:
+    start = last["date"] - pd.DateOffset(months=months[choice])
+    view = df[df["date"] >= start]
