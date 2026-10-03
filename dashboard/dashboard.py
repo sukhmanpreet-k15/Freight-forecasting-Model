@@ -1,5 +1,3 @@
-from turtle import right
-
 import pandas as pd
 import joblib
 import streamlit as st
@@ -46,7 +44,7 @@ for col, (ship, name) in zip(columns, ships.items()):
     col.metric(name + " - expected", int(round(pred)), int(round(pred - last[ship])))
 
     # ---------- PART 2: time range buttons ----------
-choice = st.radio("Time range", ["1M", "3M", "6M", "1Y", "All"], index=3, horizontal=True)
+choice = st.sidebar.radio("Time range", ["1M", "3M", "6M", "1Y", "All"], index=3)
 months = {"1M": 1, "3M": 3, "6M": 6, "1Y": 12}
  
 if choice == "All":
