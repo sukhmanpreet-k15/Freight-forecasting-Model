@@ -1,8 +1,10 @@
+from turtle import right
+
 import pandas as pd
 import joblib
 import streamlit as st
-
-st.title("Freight Forecasting - Model 1")
+import plotly.graph_objects as go
+st.title("Freight Forecasting Model")
 
 df = pd.read_csv("C:\\Users\\sukhm\\OneDrive\\Desktop\\pydev\\Freight-forecasting-Model\\data\\processed\\model1_data.csv")
 df["date"] = pd.to_datetime(df["date"])
@@ -21,7 +23,7 @@ ships = {
 
 folder = "C:\\Users\\sukhm\\OneDrive\\Desktop\\pydev\\Freight-forecasting-Model\\models\\"
 oil = df["DCOILBRENTEU"]
-
+preds = {}
 columns = st.columns(4)
 
 for col, (ship, name) in zip(columns, ships.items()):
@@ -40,6 +42,7 @@ for col, (ship, name) in zip(columns, ships.items()):
     }])
 
     pred = model.predict(row)[0]
+    preds[ship] = pred
     col.metric(name + " - expected", int(round(pred)), int(round(pred - last[ship])))
 
     # ---------- PART 2: time range buttons ----------
@@ -51,3 +54,34 @@ if choice == "All":
 else:
     start = last["date"] - pd.DateOffset(months=months[choice])
     view = df[df["date"] >= start]
+
+#part 3 for graphs 
+def make_chart(ship, name):
+    next_day = last["date"] + pd.offsets.BDay(1)
+    fig = go.Figure()
+ 
+    # blue line with color under it (the past)
+    fig.add_scatter(x=view["date"], y=view[ship], name="Actual", fill="tozeroy",
+                    line=dict(color="#08eef6"), hovertemplate="%{y:.0f}")
+ 
+    # dotted line to the prediction (no hover on the line itself)
+    fig.add_scatter(x=[last["date"], next_day], y=[last[ship], preds[ship]],
+                    line=dict(color="#860cf0", dash="dot"), hoverinfo="skip")
+ 
+    # the predicted point (this one shows "Expected" on hover)
+    fig.add_scatter(x=[next_day], y=[preds[ship]], name="Expected", mode="markers",
+                    marker=dict(color="#93c5fd", size=9), hovertemplate="%{y:.0f}")
+ 
+    fig.update_yaxes(range=[min(view[ship].min(), preds[ship]) * 0.95, max(view[ship].max(), preds[ship]) * 1.05])
+    fig.update_xaxes(hoverformat="%d %b %Y")
+    fig.update_layout(template="plotly_dark", title=name, height=300,
+                      showlegend=False, hovermode="x unified",
+                      hoverlabel=dict(bgcolor="#830aed", bordercolor="#04f9c0",
+                                      font=dict(size=15, color="white")))
+    return fig
+left, right = st.columns(2)
+ 
+for i, (ship, name) in enumerate(ships.items()):
+    place = left if i % 2 == 0 else right
+    place.plotly_chart(make_chart(ship, name))
+ 
