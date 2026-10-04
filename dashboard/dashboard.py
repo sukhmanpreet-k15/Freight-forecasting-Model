@@ -130,3 +130,16 @@ else:
     pred2 = model2.predict(row2)[0]
  
     st.metric("WCI - expected next week", int(round(pred2)), int(round(pred2 - last2["wci"])))
+
+    view2 = get_view(df2, last2["date"])
+    next_week = last2["date"] + pd.Timedelta(weeks=1)
+ 
+    fig2 = go.Figure()
+ 
+    # line with color under it (the past)
+    fig2.add_scatter(x=view2["date"], y=view2["wci"], name="Actual", fill="tozeroy",
+                     line=dict(color="#08eef6"), hovertemplate="%{y:.0f}")
+ 
+    # dotted line to the prediction (no hover on the line itself)
+    fig2.add_scatter(x=[last2["date"], next_week], y=[last2["wci"], pred2],
+                     line=dict(color="#860cf0", dash="dot"), hoverinfo="skip")
