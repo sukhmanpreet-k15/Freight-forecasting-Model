@@ -42,7 +42,7 @@ if page == "Ship cost (Model 1)":
  
     oil = df["DCOILBRENTEU"]
     preds = {}
-    columns = st.columns(4)
+    columns = st.columns(5)
  
     for col, (ship, name) in zip(columns, ships.items()):
         model = joblib.load(folder + f"model1_{ship}.pkl")
@@ -61,8 +61,10 @@ if page == "Ship cost (Model 1)":
  
         pred = model.predict(row)[0]
         preds[ship] = pred
-        col.metric(name + " - expected", int(round(pred)), int(round(pred - last[ship])))
- 
+        with col.container(border=True):
+            st.metric(name + " - expected", int(round(pred)), int(round(pred - last[ship])))
+    with columns[4].container(border=True):
+        st.metric("Brent oil price", round(oil.iloc[-1], 1), round(oil.iloc[-1] - oil.iloc[-2], 1))
     view = get_view(df, last["date"])
  
     # part 3 for graphs
@@ -86,7 +88,7 @@ if page == "Ship cost (Model 1)":
         fig.update_xaxes(hoverformat="%d %b %Y")
         fig.update_layout(template="plotly_dark", title=name, height=300,
                           showlegend=False, hovermode="x unified",
-                          hoverlabel=dict(bgcolor="#830aed", bordercolor="#04f9c0",
+                          hoverlabel=dict(bgcolor="#ed5909", bordercolor="#04f9c0",
                                           font=dict(size=15, color="white")))
         return fig
  
@@ -94,8 +96,8 @@ if page == "Ship cost (Model 1)":
  
     for i, (ship, name) in enumerate(ships.items()):
         place = left if i % 2 == 0 else right
-        place.plotly_chart(make_chart(ship, name))
- 
+        with place.container(border=True):
+            st.plotly_chart(make_chart(ship, name))
  
 # =====================================================================
 # PAGE 2: CONTAINER COST - WCI (MODEL 2)
@@ -129,8 +131,12 @@ else:
  
     pred2 = model2.predict(row2)[0]
  
-    st.metric("WCI - expected next week", int(round(pred2)), int(round(pred2 - last2["wci"])))
+    box1, box2, box3, box4 = st.columns(4)
 
+    with box1.container(border=True):
+        st.metric("WCI - expected next week", int(round(pred2)), int(round(pred2 - last2["wci"])))
+    with box2.container(border=True):
+        st.metric("Brent oil price", round(oil2.iloc[-1], 1), round(oil2.iloc[-1] - oil2.iloc[-2], 1))
     view2 = get_view(df2, last2["date"])
     next_week = last2["date"] + pd.Timedelta(weeks=1)
  
@@ -138,8 +144,22 @@ else:
  
     # line with color under it (the past)
     fig2.add_scatter(x=view2["date"], y=view2["wci"], name="Actual", fill="tozeroy",
-                     line=dict(color="#08eef6"), hovertemplate="%{y:.0f}")
+                     line=dict(color="#ed5909"), hovertemplate="%{y:.0f}")
  
     # dotted line to the prediction (no hover on the line itself)
     fig2.add_scatter(x=[last2["date"], next_week], y=[last2["wci"], pred2],
-                     line=dict(color="#860cf0", dash="dot"), hoverinfo="skip")
+                     line=dict(color="#f0dd0c", dash="dot"), hoverinfo="skip")
+
+    # the predicted point (this one shows "Expected" on hover)
+    fig2.add_scatter(x=[next_week], y=[pred2], name="Expected", mode="markers",
+                     marker=dict(color="#f60303", size=9), hovertemplate="%{y:.0f}")
+ 
+    fig2.update_yaxes(range=[min(view2["wci"].min(), pred2) * 0.95, max(view2["wci"].max(), pred2) * 1.05])
+    fig2.update_xaxes(hoverformat="%d %b %Y")
+    fig2.update_layout(template="plotly_dark", title="WCI (container freight rate)", height=380,
+                       showlegend=False, hovermode="x unified",
+                       hoverlabel=dict(bgcolor="#04b6e2", bordercolor="#f904af",
+                                       font=dict(size=15, color="white")))
+    with st.container(border=True):
+        st.plotly_chart(fig2)
+ 
