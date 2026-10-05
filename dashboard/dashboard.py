@@ -2,7 +2,7 @@ import pandas as pd
 import joblib
 import streamlit as st
 import plotly.graph_objects as go
- 
+st.set_page_config(layout="wide")
 # ---------- SIDEBAR (used by both models) ----------
 page = st.sidebar.radio("What do you want to see?", ["Ship cost (Model 1)", "Container cost - WCI (Model 2)"])
 choice = st.sidebar.radio("Time range", ["1M", "3M", "6M", "1Y", "All"], index=3)
@@ -98,7 +98,21 @@ if page == "Ship cost (Model 1)":
         place = left if i % 2 == 0 else right
         with place.container(border=True):
             st.plotly_chart(make_chart(ship, name))
- 
+            fig_oil = go.Figure()
+
+    fig_oil.add_scatter(x=view["date"], y=view["DCOILBRENTEU"], name="Oil price", fill="tozeroy",
+                        line=dict(color="#08eef6"), hovertemplate="%{y:.1f}")
+
+    fig_oil.update_yaxes(range=[view["DCOILBRENTEU"].min() * 0.95, view["DCOILBRENTEU"].max() * 1.05])
+    fig_oil.update_xaxes(hoverformat="%d %b %Y")
+    fig_oil.update_layout(template="plotly_dark", title="Brent oil price", height=300,
+                          margin=dict(l=30, r=30, t=50, b=30),
+                          showlegend=False, hovermode="x unified",
+                          hoverlabel=dict(bgcolor="#ed5909", bordercolor="#04f9c0",
+                                          font=dict(size=15, color="white")))
+
+    with st.container(border=True):
+        st.plotly_chart(fig_oil)
 # =====================================================================
 # PAGE 2: CONTAINER COST - WCI (MODEL 2)
 # =====================================================================
