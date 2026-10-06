@@ -19,9 +19,8 @@ def get_view(data, last_date):
     return data[data["date"] >= start]
  
  
-# =====================================================================
 # PAGE 1: SHIP COST (MODEL 1)
-# =====================================================================
+
 if page == "Ship cost (Model 1)":
     st.title("Freight Forecasting Model")
  
@@ -113,9 +112,9 @@ if page == "Ship cost (Model 1)":
 
     with st.container(border=True):
         st.plotly_chart(fig_oil)
-# =====================================================================
+
 # PAGE 2: CONTAINER COST - WCI (MODEL 2)
-# =====================================================================
+
 else:
     st.title("Freight Forecasting Model - WCI")
  
