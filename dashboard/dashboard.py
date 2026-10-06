@@ -176,4 +176,18 @@ else:
                                        font=dict(size=15, color="white")))
     with st.container(border=True):
         st.plotly_chart(fig2)
- 
+        fig_oil2 = go.Figure()
+
+    fig_oil2.add_scatter(x=view2["date"], y=view2["DCOILBRENTEU"], name="Oil price", fill="tozeroy",
+                         line=dict(color="#ed5909"), hovertemplate="%{y:.1f}")
+
+    fig_oil2.update_yaxes(range=[view2["DCOILBRENTEU"].min() * 0.95, view2["DCOILBRENTEU"].max() * 1.05])
+    fig_oil2.update_xaxes(hoverformat="%d %b %Y")
+    fig_oil2.update_layout(template="plotly_dark", title="Brent oil price", height=300,
+                           margin=dict(l=30, r=30, t=50, b=30),
+                           showlegend=False, hovermode="x unified",
+                           hoverlabel=dict(bgcolor="#04b6e2", bordercolor="#f904af",
+                                           font=dict(size=15, color="white")))
+
+    with st.container(border=True):
+        st.plotly_chart(fig_oil2)
