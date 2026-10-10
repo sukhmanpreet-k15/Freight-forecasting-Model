@@ -2,34 +2,60 @@ import pandas as pd
 
 folder = r"C:\Users\sukhm\OneDrive\Desktop\pydev\Freight-forecasting-Model\data\raw"
 
-r = pd.read_csv(folder + r"\drewry_shanghai-genoa.csv")
-r["date"] = pd.to_datetime(r["date"])
-
-# print("total rows:", len(r))
-
-nodate = r[r["date"].isna()]
-# print("rows with no date:", len(nodate))
-# print("of these, rows that have a price:", nodate["wci"].notna().sum())
-# print("row numbers:", nodate.index.tolist())
-
-first = nodate.index[0]
-print(r.iloc[max(first - 2, 0) : first + 3])
+routes = ["shanghai-rotterdam", "rotterdam-shanghai", "shanghai-los angeles",
+          "los angeles-shanghai", "shanghai-genoa", "new york-rotterdam", "rotterdam-new york"]
 
 
-d = r.dropna(subset=["date"])
-gap = d["date"].diff().dt.days
+def clean_route(route):
+    r = pd.read_csv(folder + rf"\drewry_{route.replace(' ', '_')}.csv")
+    r["date"] = pd.to_datetime(r["date"])
 
-print(gap.value_counts())
-print("weeks missing between dated rows:", (gap / 7 - 1).sum())
-print("rows with no date:", r["date"].isna().sum())
+    # A: give rows with no date a date (the date above + 7 days)
+    dates = r["date"].tolist()
+    for i in range(1, len(dates)):
+        if pd.isna(dates[i]):
+            dates[i] = dates[i - 1] + pd.Timedelta(days=7)
+    r["date"] = dates
 
-dates = r["date"].tolist()
+    # B: move every date to Thursday
+    r["date"] = r["date"] + pd.to_timedelta(3 - r["date"].dt.weekday, unit="D")
+    if r["date"].duplicated().any():
+        print(route, "has repeated dates after the Thursday step")
 
-for i in range(1, len(dates)):
-    if pd.isna(dates[i]):
-        dates[i] = dates[i - 1] + pd.Timedelta(days=7)
+    # C: add the missing weeks and fill their prices
+    r = r.set_index("date")
+    all_weeks = pd.date_range(r.index.min(), r.index.max(), freq="7D")
+    r = r.reindex(all_weeks)
+    r["wci"] = r["wci"].interpolate()
+    return r["wci"]
 
-r["date"] = dates
 
-print("rows with no date now:", r["date"].isna().sum())
-print(r["date"].diff().dt.days.value_counts())
+prices = {}
+
+for route in routes:
+    prices[route] = clean_route(route)
+    print(route, "| rows:", len(prices[route]), "| empty:", prices[route].isna().sum())
+
+table = pd.DataFrame(prices)
+table.index.name = "date"
+
+print(table.tail())
+print(table.shape)
+print("empty values in the whole table:", table.isna().sum().sum())
+#Step 4: add the oil price. Each week (Thursday) will get the oil price of that Thursday.
+oil = pd.read_csv(folder + r"\brent_oil.csv")
+oil["DATE"] = pd.to_datetime(oil["DATE"])
+oil = oil.rename(columns={"DATE": "date"})
+oil["DCOILBRENTEU"] = oil["DCOILBRENTEU"].ffill()
+
+table = table.reset_index()
+table = table.merge(oil, on="date", how="left")
+
+table.columns = table.columns.str.replace(" ", "_").str.replace("-", "_")
+
+print(table.tail(10))
+print("empty oil values:", table["DCOILBRENTEU"].isna().sum())
+print("different oil prices in the last 20 weeks:", table["DCOILBRENTEU"].tail(20).nunique())
+print(table.shape)
+
+table.to_csv(r"C:\Users\sukhm\OneDrive\Desktop\pydev\Freight-forecasting-Model\data\processed\model2_routes_data.csv", index=False)
