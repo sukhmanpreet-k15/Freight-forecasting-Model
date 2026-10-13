@@ -116,38 +116,49 @@ if page == "Ship cost (Model 1)":
 # PAGE 2: CONTAINER COST - WCI (MODEL 2)
 
 else:
-    st.title("Freight Forecasting Model - WCI")
- 
-    df2 = pd.read_csv(r"C:\Users\sukhm\OneDrive\Desktop\pydev\Freight-forecasting-Model\data\processed\model2_data.csv")
+    st.title("Freight Forecasting Model - Routes")
+
+    df2 = pd.read_csv(r"C:\Users\sukhm\OneDrive\Desktop\pydev\Freight-forecasting-Model\data\processed\model2_routes_data.csv")
     df2["date"] = pd.to_datetime(df2["date"])
- 
     last2 = df2.iloc[-1]
- 
+
     st.write("Latest data date:", last2["date"].date())
     st.caption("Expected value is for the next week after this date.")
- 
-    wci = df2["wci"]
+
+    names = {
+        "Shanghai to Rotterdam": "shanghai_rotterdam",
+        "Rotterdam to Shanghai": "rotterdam_shanghai",
+        "Shanghai to Los Angeles": "shanghai_los_angeles",
+        "Los Angeles to Shanghai": "los_angeles_shanghai",
+        "Shanghai to Genoa": "shanghai_genoa",
+        "New York to Rotterdam": "new_york_rotterdam",
+        "Rotterdam to New York": "rotterdam_new_york",
+    }
+
+    route_label = st.sidebar.selectbox("Select a route", list(names.keys()))
+    route = names[route_label]
+
+    model = joblib.load(folder + f"model2_{route}.pkl")
+    s = df2[route]
     oil2 = df2["DCOILBRENTEU"]
- 
-    model2 = joblib.load(folder + "model2_wci.pkl")
- 
-    # same 7 features the model was trained with, for the next week
-    row2 = pd.DataFrame([{
-        "wci_lastweek": wci.iloc[-1],
-        "wci_lag2": wci.iloc[-2],
-        "wci_lag3": wci.iloc[-3],
-        "wci_change": wci.iloc[-1] - wci.iloc[-2],
-        "wci_roll3": wci.iloc[-3:].mean(),
+
+    row = pd.DataFrame([{
+        f"{route}_lastweek": s.iloc[-1],
+        f"{route}_lag2": s.iloc[-2],
+        f"{route}_lag3": s.iloc[-3],
+        f"{route}_change": s.iloc[-1] - s.iloc[-2],
+        f"{route}_roll3": s.iloc[-3:].mean(),
         "oil_lastweek": oil2.iloc[-1],
         "oil_roll3": oil2.iloc[-3:].mean(),
     }])
- 
-    pred2 = model2.predict(row2)[0]
- 
+
+    pred = model.predict(row)[0]
+
     box1, box2, box3, box4 = st.columns(4)
 
     with box1.container(border=True):
-        st.metric("WCI - expected next week", int(round(pred2)), int(round(pred2 - last2["wci"])))
+        st.metric(route_label + " - expected", int(round(pred)), int(round(pred - s.iloc[-1])))
+
     with box2.container(border=True):
         st.metric("Brent oil price", round(oil2.iloc[-1], 1), round(oil2.iloc[-1] - oil2.iloc[-2], 1))
     view2 = get_view(df2, last2["date"])
