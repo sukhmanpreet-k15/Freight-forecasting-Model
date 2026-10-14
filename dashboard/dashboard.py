@@ -161,32 +161,34 @@ else:
 
     with box2.container(border=True):
         st.metric("Brent oil price", round(oil2.iloc[-1], 1), round(oil2.iloc[-1] - oil2.iloc[-2], 1))
-    view2 = get_view(df2, last2["date"])
+        view2 = get_view(df2, last2["date"])
     next_week = last2["date"] + pd.Timedelta(weeks=1)
- 
+
     fig2 = go.Figure()
- 
+
     # line with color under it (the past)
-    fig2.add_scatter(x=view2["date"], y=view2["wci"], name="Actual", fill="tozeroy",
+    fig2.add_scatter(x=view2["date"], y=view2[route], name="Actual", fill="tozeroy",
                      line=dict(color="#ed5909"), hovertemplate="%{y:.0f}")
- 
+
     # dotted line to the prediction (no hover on the line itself)
-    fig2.add_scatter(x=[last2["date"], next_week], y=[last2["wci"], pred2],
+    fig2.add_scatter(x=[last2["date"], next_week], y=[last2[route], pred],
                      line=dict(color="#f0dd0c", dash="dot"), hoverinfo="skip")
 
     # the predicted point (this one shows "Expected" on hover)
-    fig2.add_scatter(x=[next_week], y=[pred2], name="Expected", mode="markers",
+    fig2.add_scatter(x=[next_week], y=[pred], name="Expected", mode="markers",
                      marker=dict(color="#f60303", size=9), hovertemplate="%{y:.0f}")
- 
-    fig2.update_yaxes(range=[min(view2["wci"].min(), pred2) * 0.95, max(view2["wci"].max(), pred2) * 1.05])
+
+    fig2.update_yaxes(range=[min(view2[route].min(), pred) * 0.95, max(view2[route].max(), pred) * 1.05])
     fig2.update_xaxes(hoverformat="%d %b %Y")
-    fig2.update_layout(template="plotly_dark", title="WCI (container freight rate)", height=380,
+    fig2.update_layout(template="plotly_dark", title=route_label + " (container freight rate)", height=380,
                        showlegend=False, hovermode="x unified",
                        hoverlabel=dict(bgcolor="#04b6e2", bordercolor="#f904af",
                                        font=dict(size=15, color="white")))
+
     with st.container(border=True):
         st.plotly_chart(fig2)
-        fig_oil2 = go.Figure()
+
+    fig_oil2 = go.Figure()
 
     fig_oil2.add_scatter(x=view2["date"], y=view2["DCOILBRENTEU"], name="Oil price", fill="tozeroy",
                          line=dict(color="#ed5909"), hovertemplate="%{y:.1f}")
