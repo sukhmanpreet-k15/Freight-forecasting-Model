@@ -1,5 +1,17 @@
 import pandas as pd
 import akshare as ak
+
+def update_model1(oil):
+    baltic = pd.read_excel("data/raw/baltic_indices.xls")
+    baltic["Date"] = pd.to_datetime(baltic["Date"])
+    baltic = baltic.rename(columns={"Date": "date"})
+    baltic = baltic.sort_values("date").reset_index(drop=True)
+    baltic = baltic.drop(columns=["CTI"])
+
+    model1 = baltic.merge(oil, on="date", how="left")
+    model1["DCOILBRENTEU"] = model1["DCOILBRENTEU"].ffill()
+    return model1
+
 def update_oil():
     url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DCOILBRENTEU"
     df = pd.read_csv(url)
