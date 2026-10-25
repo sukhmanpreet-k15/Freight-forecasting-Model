@@ -2,22 +2,8 @@ import pandas as pd
 import joblib
 import streamlit as st
 import plotly.graph_objects as go
-from updateing_data import update_oil, update_wci, update_model1
 st.set_page_config(layout="wide")
 
-
-@st.cache_data(ttl=3600)
-def get_fresh_data():
-    oil = update_oil()
-    model1_data = update_model1(oil)
-    wci = update_wci(oil)
-    return model1_data, wci
-
-model1_data, wci = get_fresh_data()
-
-if st.sidebar.button("Refresh data now"):
-    st.cache_data.clear()
-    st.rerun()
 # ---------- SIDEBAR (used by both models) ----------
 page = st.sidebar.radio("What do you want to see?", ["Ship cost (Model 1)", "Container cost - WCI (Model 2)"])
 choice = st.sidebar.radio("Time range", ["1M", "3M", "6M", "1Y", "All"], index=3)
