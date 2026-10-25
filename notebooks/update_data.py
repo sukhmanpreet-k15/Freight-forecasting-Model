@@ -1,3 +1,6 @@
+'''
+# not working updations
+
 import pandas as pd
 import akshare as ak
 
@@ -75,3 +78,4 @@ if __name__ == "__main__":
 
     print("oil last date:", oil["date"].max())
     print("wci last date:", wci["date"].max(), "| rows:", len(wci))
+'''
