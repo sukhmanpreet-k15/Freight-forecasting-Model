@@ -9,7 +9,7 @@ page = st.sidebar.radio("What do you want to see?", ["Ship cost (Model 1)", "Con
 choice = st.sidebar.radio("Time range", ["1M", "3M", "6M", "1Y", "All"], index=3)
 months = {"1M": 1, "3M": 3, "6M": 6, "1Y": 12}
  
-folder = "C:\\Users\\sukhm\\OneDrive\\Desktop\\pydev\\Freight-forecasting-Model\\models\\"
+folder = r"models/"
  
  
 # keeps only the rows inside the chosen time range (counted back from the last date of that data)
@@ -25,7 +25,7 @@ def get_view(data, last_date):
 if page == "Ship cost (Model 1)":
     st.title("Freight Forecasting Model")
  
-    df = pd.read_csv("C:\\Users\\sukhm\\OneDrive\\Desktop\\pydev\\Freight-forecasting-Model\\data\\processed\\model1_data.csv")
+    df = pd.read_csv(r"data/processed/model1_data.csv")
     df["date"] = pd.to_datetime(df["date"])
  
     last = df.iloc[-1]
@@ -119,7 +119,7 @@ if page == "Ship cost (Model 1)":
 else:
     st.title("Freight Forecasting Model - Routes")
 
-    df2 = pd.read_csv(r"C:\Users\sukhm\OneDrive\Desktop\pydev\Freight-forecasting-Model\data\processed\model2_routes_data.csv")
+    df2 = pd.read_csv(r"data/processed/model2_routes_data.csv")
     df2["date"] = pd.to_datetime(df2["date"])
     last2 = df2.iloc[-1]
 

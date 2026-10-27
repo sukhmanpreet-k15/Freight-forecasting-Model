@@ -74,7 +74,7 @@ if __name__ == "__main__":
     oil = update_oil()
     wci = update_wci(oil)
 
-    wci.to_csv(r"C:\Users\sukhm\OneDrive\Desktop\pydev\Freight-forecasting-Model\data\processed\model2_routes_data.csv", index=False)
+    wci.to_csv(r"data/processed/model2_routes_data.csv", index=False)
 
     print("oil last date:", oil["date"].max())
     print("wci last date:", wci["date"].max(), "| rows:", len(wci))

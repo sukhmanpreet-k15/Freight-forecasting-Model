@@ -3,7 +3,7 @@ import joblib
 from sklearn.linear_model import LinearRegression
 
 # read the clean Model 2 table
-data = pd.read_csv(r"C:\Users\sukhm\OneDrive\Desktop\pydev\Freight-forecasting-Model\data\processed\model2_routes_data.csv")
+data = pd.read_csv(r"data/processed/model2_routes_data.csv")
 data["date"] = pd.to_datetime(data["date"])
 
 routes = ["shanghai_rotterdam", "rotterdam_shanghai", "shanghai_los_angeles",
@@ -31,5 +31,5 @@ for route in routes:
     model = LinearRegression()
     model.fit(data[features], data[route])
 
-    joblib.dump(model, rf"C:\Users\sukhm\OneDrive\Desktop\pydev\Freight-forecasting-Model\models\model2_{route}.pkl")
+    joblib.dump(model, f"models/model2_{route}.pkl")
     print(route, "saved.")

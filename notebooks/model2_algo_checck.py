@@ -7,7 +7,7 @@ from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
 from sklearn.metrics import mean_absolute_error
 
 #data is loaded from the processed folder
-data = pd.read_csv(r"C:\Users\sukhm\OneDrive\Desktop\pydev\Freight-forecasting-Model\data\processed\model2_routes_data.csv")
+data = pd.read_csv(r"data/processed/model2_routes_data.csv")
 data["date"] = pd.to_datetime(data["date"])
 
 routes = ["shanghai_rotterdam", "rotterdam_shanghai", "shanghai_los_angeles",

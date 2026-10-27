@@ -5,5 +5,5 @@ start = datetime.datetime(2012, 1, 1)
 end = datetime.datetime(2026, 9, 17)
 
 oil = web.DataReader("DCOILBRENTEU", "fred", start, end)
-oil.to_csv("data/raw/brent_oil.csv")
+oil.to_csv(r"data/raw/brent_oil.csv")
 print(oil.head())
