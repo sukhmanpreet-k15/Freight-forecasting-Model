@@ -1,4 +1,9 @@
 __pycache__/
-venv/
-.env
 *.pyc
+venv/
+.venv/
+.env
+.vscode/
+.ipynb_checkpoints/
+data/raw/baltic_indices.xls
+data/processed/model1_data.csv

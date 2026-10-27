@@ -182,3 +182,11 @@ This will be fixed when a source with daily or weekly updated data is available.
 ## Note
 
 Freight prices change slowly, so a simple "copy last week" guess is hard to beat. That is why each model is compared with the naive guess before it is trusted.
+
+## Status
+The data is not updated automatically yet. See `ROADMAP.md` for what is planned.
+
+## License
+MIT License. See the `LICENSE` file.
+
+“Data”: Baltic data is not included in this repo because of its terms of use.
